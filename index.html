@@ -444,7 +444,7 @@ body::after {
 }
 .input-display.fout { border-color: var(--terracotta); animation: schud .35s ease; }
 .input-display.goed { border-color: var(--sage); }
-.input-display.leeg { color: var(--muted); font-size: 24px; font-weight: 500; padding-top: 22px; }
+.input-display.leeg { color: var(--muted); font-weight: 500; }
 .nummerpad {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -703,6 +703,7 @@ body::after {
         </div>
         <div class="nummerpad-wrap">
           <div class="input-display leeg" id="ov-input">Tik een getal</div>
+          <div id="ov-nul-melding" style="display:none;text-align:center;font-size:14px;font-weight:600;color:var(--terracotta);margin:-4px 0 8px;">0 is nooit het goede antwoord!</div>
           <div class="nummerpad" id="ov-numpad"></div>
         </div>
       </div>
@@ -1119,6 +1120,7 @@ function updateInputDisplay() {
   if (ovInput === '') {
     el.className = 'input-display leeg';
     el.textContent = 'Tik een getal';
+    document.getElementById('ov-nul-melding').style.display = 'none';
   } else {
     el.className = 'input-display';
     el.textContent = ovInput;
@@ -1148,7 +1150,14 @@ function numpadTik(k) {
     controleerOverhoringAntwoord();
   } else {
     if (ovInput.length >= 3) return;
-    if (ovInput === '0') return;
+    if (ovInput === '0') {
+      ovInput = '';
+      updateInputDisplay();
+      const m = document.getElementById('ov-nul-melding');
+      m.style.display = 'block';
+      setTimeout(() => { m.style.display = 'none'; }, 1800);
+      return;
+    }
     ovInput += k;
     updateInputDisplay();
   }
