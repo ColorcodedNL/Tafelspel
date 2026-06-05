@@ -11,34 +11,30 @@
 <title>Tafelspel</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
 html, body { height: 100%; }
 
 :root {
-  /* Pok Pok bright playful palette — matched to Breukenspel */
-  --creme:           #FAF4E6;   /* light cream bg */
+  --creme:           #FAF4E6;
   --warm-white:      #FFFFFF;
-  --ink:             #1F3A4D;   /* deep navy */
+  --ink:             #1F3A4D;
   --muted:           #A8B5C0;
-  --brown-mid:       #5A7184;   /* soft slate (was warm brown) */
+  --brown-mid:       #5A7184;
 
-  --terracotta:      #EE5B4C;   /* coral — primary accent */
+  --terracotta:      #EE5B4C;
   --terracotta-light:#F7B4AD;
   --terracotta-soft: #FCE3E0;
-  --sage:            #5BBE7C;   /* green */
+  --sage:            #5BBE7C;
   --sage-light:      #B4E2C2;
   --sage-soft:       #E2F5E9;
-  --mustard:         #E0A920;   /* deep sunshine (text-safe) */
+  --mustard:         #E0A920;
   --mustard-light:   #FFE19A;
   --mustard-soft:    #FFF6DC;
-  --berry:           #9B7BC2;   /* plum */
-  --berry-soft:      #ECE3F5;
-  --teal-soft:       #DBF3F4;
-  --sky:             #2B8AE0;   /* cobalt blue */
+  --sky:             #2B8AE0;
   --sky-soft:        #DCEBF9;
-  --teal:            #1FAFB8;   /* cyan-teal */
+  --berry:           #9B7BC2;
 
   --shadow:          rgba(31,58,77,0.12);
   --shadow-flat:     0 3px 0 rgba(31, 58, 77, 0.16);
@@ -46,7 +42,7 @@ html, body { height: 100%; }
 }
 
 body {
-  font-family: 'Fredoka', 'Nunito', system-ui, sans-serif;
+  font-family: 'Fredoka', system-ui, sans-serif;
   color: var(--ink);
   background-color: var(--creme);
   min-height: 100vh;
@@ -616,18 +612,6 @@ body::after {
 
 /* Confetti canvas */
 #confetti-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9999; }
-
-/* Kleuren per tafel — bright Pok Pok rotation */
-.rij-kleur-0 { background: #2B8AE0; }
-.rij-kleur-1 { background: #EE5B4C; }
-.rij-kleur-2 { background: #FFCB3D; }
-.rij-kleur-3 { background: #1FAFB8; }
-.rij-kleur-4 { background: #9B7BC2; }
-.rij-kleur-5 { background: #5BBE7C; }
-.rij-kleur-6 { background: #F4A1B3; }
-.rij-kleur-7 { background: #1E6BB8; }
-.rij-kleur-8 { background: #E0A920; }
-.rij-kleur-9 { background: #C9412F; }
 
 @media (orientation: landscape) and (max-height: 600px) {
   .app { padding: 8px 12px 16px; }
