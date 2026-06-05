@@ -931,7 +931,7 @@ function startTafel(n) {
 function bouwTafelNumpad() {
   const pad = document.getElementById('t-numpad');
   pad.innerHTML = '';
-  const layout = ['7','8','9','4','5','6','1','2','3','⌫','0','✓'];
+  const layout = ['1','2','3','4','5','6','7','8','9','⌫','0','✓'];
   layout.forEach(k => {
     const btn = document.createElement('button');
     if (k === '⌫') { btn.className = 'num-btn del'; btn.innerHTML = '⌫'; btn.onclick = () => tafelNumpadTik('del'); }
@@ -959,6 +959,7 @@ function tafelNumpadTik(k) {
     return;
   } else {
     if (waarde.length >= 3) return;
+    if (waarde === '0') return;
     waarde += k;
   }
   cel.dataset.waarde = waarde;
@@ -1127,7 +1128,7 @@ function updateInputDisplay() {
 function bouwNumpad() {
   const pad = document.getElementById('ov-numpad');
   pad.innerHTML = '';
-  const layout = ['7','8','9','4','5','6','1','2','3','⌫','0','✓'];
+  const layout = ['1','2','3','4','5','6','7','8','9','⌫','0','✓'];
   layout.forEach(k => {
     const btn = document.createElement('button');
     if (k === '⌫') { btn.className = 'num-btn del'; btn.textContent = '⌫'; btn.onclick = () => numpadTik('del'); }
@@ -1147,6 +1148,7 @@ function numpadTik(k) {
     controleerOverhoringAntwoord();
   } else {
     if (ovInput.length >= 3) return;
+    if (ovInput === '0') return;
     ovInput += k;
     updateInputDisplay();
   }
