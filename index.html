@@ -1081,7 +1081,7 @@ function genereerOverhoringSommen() {
     }
   } else {
     const alle = [];
-    for (let i = 1; i <= 10; i++) alle.push({ a: ovTafel, b: i });
+    for (let i = 1; i <= 10; i++) alle.push({ a: i, b: ovTafel });
     const geshuffled = shuffle(alle);
     for (let i = 0; i < OV_TOTAAL; i++) sommen.push(geshuffled[i % geshuffled.length]);
   }
