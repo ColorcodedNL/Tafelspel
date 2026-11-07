@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Speels oefenspel voor de tafels van 1 t/m 10: oefenen, tafels invullen en overhoren.">
+<meta name="theme-color" content="#FAF4E6">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Tafelspel">
 <link rel="icon" type="image/png" sizes="32x32" href="tafelspel-favicon-32.png">
@@ -15,6 +18,8 @@
 <style>
 *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
 html, body { height: 100%; }
+/* Geen dubbeltik-zoom op iPad bij snel tikken op knoppen */
+button, .tr-input { touch-action: manipulation; -webkit-user-select: none; user-select: none; }
 
 :root {
   --creme:           #FAF4E6;
@@ -24,19 +29,14 @@ html, body { height: 100%; }
   --brown-mid:       #5A7184;
 
   --terracotta:      #EE5B4C;
-  --terracotta-light:#F7B4AD;
   --terracotta-soft: #FCE3E0;
   --sage:            #5BBE7C;
-  --sage-light:      #B4E2C2;
-  --sage-soft:       #E2F5E9;
   --mustard:         #E0A920;
-  --mustard-light:   #FFE19A;
   --mustard-soft:    #FFF6DC;
   --sky:             #2B8AE0;
   --sky-soft:        #DCEBF9;
   --berry:           #9B7BC2;
 
-  --shadow:          rgba(31,58,77,0.12);
   --shadow-flat:     0 3px 0 rgba(31, 58, 77, 0.16);
   --shadow-press:    0 5px 0 rgba(31, 58, 77, 0.22);
 }
@@ -130,9 +130,32 @@ body::after {
   color: #fff;
   box-shadow: var(--shadow-flat);
 }
-.tab.active:nth-child(1) { background: var(--terracotta); }
-.tab.active:nth-child(2) { background: var(--sky); }
-.tab.active:nth-child(3) { background: var(--berry); }
+.tab.active[data-tab="tafels"] { background: var(--sky); }
+.tab.active[data-tab="oefenen"] { background: var(--terracotta); }
+.tab.active[data-tab="overhoring"] { background: var(--berry); }
+
+/* Keuze kiezen / zelf typen bij Oefenen */
+.modus-keuze {
+  display: flex;
+  gap: 4px;
+  width: fit-content;
+  margin: 0 auto 16px;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(31,58,77,0.08);
+}
+.modus-btn {
+  padding: 8px 18px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--brown-mid);
+  cursor: pointer;
+}
+.modus-btn.actief { background: #fff; color: var(--ink); box-shadow: var(--shadow-flat); }
 
 /* Screens */
 .screen { display: none; }
@@ -181,9 +204,10 @@ body::after {
   height: 26px;
   border-radius: 50%;
   display: inline-block;
-  transition: transform .2s;
   box-shadow: inset 0 0 0 2px rgba(31,58,77,0.18);
+  animation: plop .2s ease backwards;
 }
+@keyframes plop { from { opacity: 0; transform: scale(0); } }
 
 /* Antwoord knoppen (multiple choice) */
 .antwoord-grid {
@@ -269,6 +293,30 @@ body::after {
   box-shadow: var(--shadow-press);
 }
 
+/* Tafelkeuze bij Oefenen (compact) */
+.oef-kies {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 7px;
+  margin-bottom: 18px;
+}
+.oef-kies .tafel-btn {
+  aspect-ratio: auto;
+  height: 46px;
+  font-size: 20px;
+  border-radius: 15px 12px 15px 12px / 12px 15px 12px 15px;
+}
+.oef-kies .tafel-btn.alle {
+  grid-column: span 2;
+  background: var(--terracotta-soft);
+  color: var(--terracotta);
+  font-size: 17px;
+}
+.oef-kies .tafel-btn.alle.active-tafel {
+  background: var(--terracotta);
+  color: #fff;
+}
+
 /* Tafel-lijst */
 .tafel-lijst-titel {
   font-size: 24px;
@@ -330,7 +378,7 @@ body::after {
   justify-content: center;
   user-select: none;
 }
-.tr-input.leeg { color: var(--ink-faint, #C9D2DA); }
+.tr-input.leeg { color: #C9D2DA; }
 .tr-input.selected {
   border-color: var(--sky);
   box-shadow: 0 0 0 4px var(--sky-soft), var(--shadow-flat);
@@ -365,28 +413,6 @@ body::after {
 .tafel-numpad.actief { display: grid; }
 .tafel-numpad .num-btn { padding: 14px 10px; }
 
-/* Voortgang tafel */
-.voortgang-bar-wrap {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-.voortgang-label { font-size: 14px; color: var(--muted); font-weight: 600; white-space: nowrap; }
-.voortgang-bar {
-  flex: 1;
-  height: 12px;
-  background: var(--sage-soft);
-  border-radius: 999px;
-  overflow: hidden;
-}
-.voortgang-fill {
-  height: 100%;
-  background: var(--sage);
-  border-radius: 999px;
-  transition: width .4s ease;
-}
-
 /* Goed banner */
 .goed-banner {
   background: var(--sage);
@@ -396,7 +422,6 @@ body::after {
   margin-top: 14px;
   box-shadow: var(--shadow-press);
 }
-.goed-emoji { font-size: 36px; display: block; margin-bottom: 6px; }
 .goed-tekst { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 12px; }
 .volgende-btn {
   padding: 12px 28px;
@@ -413,18 +438,6 @@ body::after {
 }
 .volgende-btn:hover { transform: translateY(-2px); }
 .volgende-btn:active { transform: translateY(2px); box-shadow: 0 0 0 rgba(0,0,0,0); }
-
-/* Einde tafel */
-.einde-banner {
-  background: var(--mustard);
-  border-radius: 28px 24px 26px 22px / 22px 26px 24px 28px;
-  padding: 24px;
-  text-align: center;
-  box-shadow: var(--shadow-press);
-}
-.einde-emoji { font-size: 48px; display: block; margin-bottom: 8px; }
-.einde-tekst { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 6px; }
-.einde-sub { font-size: 15px; color: rgba(255,255,255,0.85); margin-bottom: 16px; font-weight: 500; }
 
 /* Nummerpad */
 .nummerpad-wrap { margin-top: 16px; }
@@ -468,8 +481,16 @@ body::after {
 .num-btn:active { transform: translateY(2px); box-shadow: 0 0 0 rgba(0,0,0,0); }
 .num-btn.del { background: var(--terracotta); color: #fff; }
 .num-btn.ok { background: var(--sage); color: #fff; }
-.num-btn.ok:hover { background: var(--sage); }
-.num-btn.leeg-btn { visibility: hidden; }
+.nul-melding {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--terracotta);
+  margin: -4px 0 8px;
+  min-height: 18px;
+  visibility: hidden;
+}
+.nul-melding.zichtbaar { visibility: visible; }
 
 /* Score overhoring */
 .ov-voortgang {
@@ -540,7 +561,7 @@ body::after {
   text-decoration: line-through;
   margin-left: 2px;
 }
-.ov-ov-som .echt { color: var(--sage-dark, var(--ink)); margin-left: 4px; font-weight: 700; }
+.ov-ov-som .echt { color: var(--ink); margin-left: 4px; font-weight: 700; }
 
 /* Eindresultaat overhoring */
 .eindresultaat {
@@ -607,7 +628,7 @@ body::after {
 .tab .ico svg { vertical-align: middle; }
 .header h1 .ico-times { color: var(--terracotta); vertical-align: -0.16em; margin-left: 2px; }
 .alle-tafels-btn .ico, .actie-btn .ico { margin-left: 6px; vertical-align: -0.16em; }
-.goed-emoji, .einde-emoji { color: #fff; display: block; margin: 0 auto 8px; line-height: 0; }
+.goed-emoji { color: #fff; display: block; margin: 0 auto 8px; line-height: 0; }
 #ov-einde-emoji { line-height: 0; }
 
 /* Confetti canvas */
@@ -627,6 +648,11 @@ body::after {
   .antwoord-grid { gap: 7px; margin-top: 10px; }
   .tafel-grid { gap: 5px; }
   .tafel-btn { font-size: 17px; border-radius: 12px; }
+  .oef-kies { gap: 5px; margin-bottom: 10px; }
+  .oef-kies .tafel-btn { height: 36px; font-size: 16px; border-radius: 12px; }
+  .oef-kies .tafel-btn.alle { font-size: 14px; }
+  .modus-keuze { margin-bottom: 8px; }
+  .modus-btn { padding: 6px 14px; font-size: 13px; }
   .num-btn { padding: 11px 8px; font-size: 20px; border-radius: 12px; }
   .input-display { font-size: 32px; min-height: 54px; padding: 10px; margin-bottom: 8px; }
   .nummerpad { gap: 5px; }
@@ -641,19 +667,29 @@ body::after {
   </div>
 
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('oefenen')"><span class="ico" data-icon="dice" data-size="20"></span>Oefenen</button>
-    <button class="tab" onclick="switchTab('tafels')"><span class="ico" data-icon="grid" data-size="20"></span>Tafels</button>
-    <button class="tab" onclick="switchTab('overhoring')"><span class="ico" data-icon="star" data-size="20"></span>Overhoring</button>
+    <button class="tab active" data-tab="tafels" onclick="switchTab('tafels')"><span class="ico" data-icon="grid" data-size="20"></span>Tafels</button>
+    <button class="tab" data-tab="oefenen" onclick="switchTab('oefenen')"><span class="ico" data-icon="dice" data-size="20"></span>Oefenen</button>
+    <button class="tab" data-tab="overhoring" onclick="switchTab('overhoring')"><span class="ico" data-icon="star" data-size="20"></span>Overhoring</button>
   </div>
 
   <!-- ========== OEFENEN ========== -->
-  <div id="screen-oefenen" class="screen active">
+  <div id="screen-oefenen" class="screen">
     <div class="card">
+      <div class="oef-kies" id="o-tafel-grid"></div>
+      <div class="modus-keuze" role="group" aria-label="Manier van antwoorden">
+        <button class="modus-btn actief" id="o-modus-kies" onclick="zetOefenModus('kies')">Kiezen</button>
+        <button class="modus-btn" id="o-modus-typ" onclick="zetOefenModus('typ')">Zelf typen</button>
+      </div>
       <div class="som-display">
         <div class="som-tekst" id="o-som">? × ? = <span class="vraagteken">?</span></div>
         <div class="bolletjes-wrap" id="o-bolletjes"></div>
       </div>
       <div class="antwoord-grid" id="o-knoppen"></div>
+      <div class="nummerpad-wrap" id="o-typ" style="display:none">
+        <div class="input-display leeg" id="o-input">Tik een getal</div>
+        <div class="nul-melding" id="o-nul-melding">Een antwoord begint nooit met 0!</div>
+        <div class="nummerpad" id="o-numpad"></div>
+      </div>
     </div>
     <div id="o-goed" style="display:none" class="goed-banner">
       <span class="goed-emoji" data-icon="sparkle" data-size="40"></span>
@@ -663,7 +699,7 @@ body::after {
   </div>
 
   <!-- ========== TAFELS ========== -->
-  <div id="screen-tafels" class="screen">
+  <div id="screen-tafels" class="screen active">
     <div class="card" id="t-kies-card">
       <div class="tafel-kies-label">Kies een tafel</div>
       <div class="tafel-grid" id="t-tafel-grid"></div>
@@ -671,7 +707,7 @@ body::after {
     <div id="t-lijst-wrap" style="display:none">
       <div class="card">
         <div class="tafel-lijst-titel" id="t-lijst-titel">Tafel van 1</div>
-        <div class="tafel-lijst-sub">Tik een rij aan en typ het antwoord</div>
+        <div class="tafel-lijst-sub" id="t-lijst-sub">Tik een rij aan en typ het antwoord</div>
         <div class="tafel-lijst" id="t-lijst"></div>
         <div class="tafel-numpad" id="t-numpad"></div>
       </div>
@@ -703,7 +739,7 @@ body::after {
         </div>
         <div class="nummerpad-wrap">
           <div class="input-display leeg" id="ov-input">Tik een getal</div>
-          <div id="ov-nul-melding" style="display:none;text-align:center;font-size:14px;font-weight:600;color:var(--terracotta);margin:-4px 0 8px;">0 is nooit het goede antwoord!</div>
+          <div class="nul-melding" id="ov-nul-melding">Een antwoord begint nooit met 0!</div>
           <div class="nummerpad" id="ov-numpad"></div>
         </div>
       </div>
@@ -791,12 +827,39 @@ function animateConfetti() {
 }
 
 // ========== HELPERS ==========
+const $ = id => document.getElementById(id);
+let actieveTab = 'tafels';
+
 function switchTab(t) {
-  document.querySelectorAll('.tab').forEach((el, i) => {
-    el.classList.toggle('active', ['oefenen','tafels','overhoring'][i] === t);
-  });
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-' + t).classList.add('active');
+  actieveTab = t;
+  document.querySelectorAll('.tab').forEach(el => el.classList.toggle('active', el.dataset.tab === t));
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === 'screen-' + t));
+}
+
+// Leeg laten bij tonen, zodat de eigen CSS-weergave (block, grid) blijft gelden
+function toon(id, zichtbaar) { $(id).style.display = zichtbaar ? '' : 'none'; }
+
+// Invoerveld boven een cijferpad (Oefenen en Overhoring)
+function toonInvoer(id, waarde, status = '') {
+  const el = $(id);
+  el.className = 'input-display' + (waarde === '' ? ' leeg' : '') + (status ? ' ' + status : '');
+  el.textContent = waarde || 'Tik een getal';
+}
+
+const nulTimers = {};
+function toonNulMelding(id) {
+  const m = $(id);
+  m.classList.add('zichtbaar');
+  clearTimeout(nulTimers[id]);
+  nulTimers[id] = setTimeout(() => m.classList.remove('zichtbaar'), 1800);
+}
+
+// Gedeelde cijferlogica: geeft de nieuwe invoer terug, of null als de toets niets doet
+function typCijfer(waarde, k, nulMeldingId) {
+  if (k === 'del') return waarde.slice(0, -1);
+  if (waarde.length >= 3) return null;
+  if (waarde === '' && k === '0') { toonNulMelding(nulMeldingId); return null; }
+  return waarde + k;
 }
 
 function shuffle(arr) {
@@ -808,10 +871,41 @@ function shuffle(arr) {
   return a;
 }
 
+function rnd10() { return 1 + Math.floor(Math.random() * 10); }
+
+// Knoppen 1 t/m 10 in een grid; id's krijgen een prefix zodat ze te markeren zijn
+function maakTafelKnoppen(container, prefix, onKlik) {
+  for (let i = 1; i <= 10; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'tafel-btn';
+    btn.id = `${prefix}-${i}`;
+    btn.textContent = i;
+    btn.onclick = () => onKlik(i);
+    container.appendChild(btn);
+  }
+}
+
+function markeerTafel(knoppen, actiefId) {
+  knoppen.forEach(b => b.classList.toggle('active-tafel', b.id === actiefId));
+}
+
+// Cijferpad 1-2-3 bovenaan, onderaan wissen / 0 / klaar
+function maakNumpad(container, onTik) {
+  container.innerHTML = '';
+  ['1','2','3','4','5','6','7','8','9','del','0','ok'].forEach(k => {
+    const btn = document.createElement('button');
+    btn.className = 'num-btn' + (k === 'del' ? ' del' : k === 'ok' ? ' ok' : '');
+    btn.textContent = k === 'del' ? '⌫' : k === 'ok' ? '✓' : k;
+    btn.setAttribute('aria-label', k === 'del' ? 'Wissen' : k === 'ok' ? 'Klaar' : k);
+    btn.onclick = () => onTik(k);
+    container.appendChild(btn);
+  });
+}
+
 function maakBolletjes(container, a, b) {
   container.innerHTML = '';
-  if (a === 0 || b === 0) return;
   const kleuren = ['#2B8AE0','#EE5B4C','#FFCB3D','#1FAFB8','#9B7BC2'];
+  const frag = document.createDocumentFragment();
   for (let r = 0; r < a; r++) {
     const rij = document.createElement('div');
     rij.className = 'bolletjes-rij';
@@ -819,413 +913,367 @@ function maakBolletjes(container, a, b) {
       const dot = document.createElement('div');
       dot.className = 'bolletje';
       dot.style.background = kleuren[r % kleuren.length];
-      dot.style.opacity = '0';
-      dot.style.transform = 'scale(0)';
+      dot.style.animationDelay = `${(r * b + k) * 25}ms`;
       rij.appendChild(dot);
-      const delay = (r * b + k) * 25;
-      setTimeout(() => {
-        dot.style.transition = 'opacity .2s, transform .2s';
-        dot.style.opacity = '1';
-        dot.style.transform = 'scale(1)';
-      }, delay);
     }
-    container.appendChild(rij);
+    frag.appendChild(rij);
   }
+  container.appendChild(frag);
 }
 
-function maakAntwoordKnoppen(container, juist, onKlik) {
-  container.innerHTML = '';
-  const verkeerd = new Set();
-  while (verkeerd.size < 3) {
-    const offset = [-1,1,-2,2,-10,10][Math.floor(Math.random()*6)];
-    const v = juist + offset;
-    if (v > 0 && v !== juist) verkeerd.add(v);
+// Foute opties uit de buurt van de som: een rij meer/minder (bv. 7×3 → 18, 24)
+// en een groepje meer/minder, aangevuld met ±1/±2. Zo moet je echt rekenen.
+function foutOpties(a, b) {
+  const juist = a * b;
+  const kandidaten = shuffle([(a - 1) * b, (a + 1) * b, a * (b - 1), a * (b + 1)]);
+  const reserve = shuffle([juist - 1, juist + 1, juist - 2, juist + 2]);
+  const fout = [];
+  for (const v of [...kandidaten, ...reserve]) {
+    if (v > 0 && v !== juist && !fout.includes(v)) fout.push(v);
+    if (fout.length === 3) break;
   }
-  const opties = shuffle([juist, ...verkeerd]);
-  opties.forEach(opt => {
+  return fout;
+}
+
+function maakAntwoordKnoppen(container, a, b, onGoed) {
+  container.innerHTML = '';
+  const juist = a * b;
+  let klaar = false;
+  shuffle([juist, ...foutOpties(a, b)]).forEach(opt => {
     const btn = document.createElement('button');
     btn.className = 'antwoord-btn';
     btn.textContent = opt;
-    btn.onclick = () => onKlik(opt, btn, juist);
+    btn.onclick = () => {
+      if (klaar) return;
+      if (opt === juist) {
+        klaar = true;
+        btn.classList.add('goed');
+        onGoed();
+      } else {
+        btn.classList.remove('fout');
+        void btn.offsetWidth; // animatie opnieuw starten bij herhaald tikken
+        btn.classList.add('fout');
+        setTimeout(() => btn.classList.remove('fout'), 400);
+      }
+    };
     container.appendChild(btn);
   });
 }
 
 // ========== OEFENEN ==========
-let oVorigA = -1, oVorigB = -1, oGoed = false;
+let oVorigA = 0, oVorigB = 0, oTafel = 0, oModus = 'kies', oInput = '', oKlaar = false;
+
+function zetOefenModus(m) {
+  oModus = m;
+  $('o-modus-kies').classList.toggle('actief', m === 'kies');
+  $('o-modus-typ').classList.toggle('actief', m === 'typ');
+  nieuweOefenSom();
+}
+
+function oefenGoed() {
+  oKlaar = true;
+  startConfetti();
+  toon('o-goed', true);
+}
+
+function oefenNumpadTik(k) {
+  if (oKlaar) return;
+  if (k === 'ok') {
+    if (oInput === '') return;
+    if (parseInt(oInput, 10) === oVorigA * oVorigB) {
+      toonInvoer('o-input', oInput, 'goed');
+      oefenGoed();
+    } else {
+      // fout: kort rood, dan leeg zodat ze opnieuw kan proberen
+      toonInvoer('o-input', oInput, 'fout');
+      oKlaar = true;
+      setTimeout(() => { oInput = ''; oKlaar = false; toonInvoer('o-input', ''); }, 700);
+    }
+    return;
+  }
+  const nieuw = typCijfer(oInput, k, 'o-nul-melding');
+  if (nieuw === null) return;
+  oInput = nieuw;
+  toonInvoer('o-input', oInput);
+}
+
+function bouwOefenGrid() {
+  const grid = $('o-tafel-grid');
+  const alle = document.createElement('button');
+  alle.className = 'tafel-btn alle';
+  alle.id = 'o-t-0';
+  alle.textContent = 'Alle';
+  alle.onclick = () => selecteerOefenTafel(0);
+  grid.appendChild(alle);
+  maakTafelKnoppen(grid, 'o-t', selecteerOefenTafel);
+  selecteerOefenTafel(0);
+}
+
+function selecteerOefenTafel(n) {
+  oTafel = n;
+  markeerTafel(document.querySelectorAll('#o-tafel-grid .tafel-btn'), `o-t-${n}`);
+  nieuweOefenSom();
+}
 
 function nieuweOefenSom() {
-  oGoed = false;
-  document.getElementById('o-goed').style.display = 'none';
+  toon('o-goed', false);
   let a, b;
   do {
-    a = 1 + Math.floor(Math.random() * 10);
-    b = 1 + Math.floor(Math.random() * 10);
+    a = rnd10();
+    b = oTafel || rnd10();
   } while (a === oVorigA && b === oVorigB);
   oVorigA = a; oVorigB = b;
-  const juist = a * b;
-  document.getElementById('o-som').innerHTML = `${a} × ${b} = <span class="vraagteken">?</span>`;
-  maakBolletjes(document.getElementById('o-bolletjes'), a, b);
-  maakAntwoordKnoppen(document.getElementById('o-knoppen'), juist, (opt, btn, j) => {
-    if (oGoed) return;
-    if (opt === j) {
-      btn.classList.add('goed');
-      oGoed = true;
-      startConfetti();
-      document.getElementById('o-goed').style.display = 'block';
-      document.querySelector('#screen-oefenen .antwoord-grid').querySelectorAll('.antwoord-btn').forEach(b2 => {
-        if (parseInt(b2.textContent) === j) b2.classList.add('goed');
-        b2.onclick = null;
-      });
-    } else {
-      btn.classList.add('fout');
-      setTimeout(() => btn.classList.remove('fout'), 400);
-    }
-  });
+  $('o-som').innerHTML = `${a} × ${b} = <span class="vraagteken">?</span>`;
+  maakBolletjes($('o-bolletjes'), a, b);
+  oKlaar = false;
+  oInput = '';
+  toon('o-knoppen', oModus === 'kies');
+  toon('o-typ', oModus === 'typ');
+  if (oModus === 'kies') maakAntwoordKnoppen($('o-knoppen'), a, b, oefenGoed);
+  else toonInvoer('o-input', '');
 }
 
 // ========== TAFELS ==========
-let huidigeTafel = 1, tafelKlaarGevierd = false, tafelSelectie = null;
-
-function bouwTafelGrid() {
-  const grid = document.getElementById('t-tafel-grid');
-  grid.innerHTML = '';
-  for (let i = 1; i <= 10; i++) {
-    const btn = document.createElement('button');
-    btn.className = 'tafel-btn';
-    btn.textContent = i;
-    btn.onclick = () => startTafel(i);
-    grid.appendChild(btn);
-  }
-}
+let tafelKlaarGevierd = false, tafelSelectie = null;
 
 function startTafel(n) {
-  huidigeTafel = n;
   tafelKlaarGevierd = false;
   tafelSelectie = null;
-  document.getElementById('t-kies-card').style.display = 'none';
-  document.getElementById('t-lijst-wrap').style.display = 'block';
-  document.getElementById('t-lijst-titel').textContent = `Tafel van ${n}`;
-  const lijst = document.getElementById('t-lijst');
+  toon('t-kies-card', false);
+  toon('t-lijst-wrap', true);
+  $('t-lijst-titel').textContent = `Tafel van ${n}`;
+  $('t-lijst-sub').textContent = 'Tik een rij aan en typ het antwoord';
+  const lijst = $('t-lijst');
   lijst.innerHTML = '';
   for (let i = 1; i <= 10; i++) {
-    const juist = i * n;
     const rij = document.createElement('div');
     rij.className = 'tafel-rij';
     rij.innerHTML = `<span class="tr-som">${i} × ${n}</span><span class="tr-eq">=</span>`;
     const cel = document.createElement('div');
     cel.className = 'tr-input leeg';
     cel.textContent = '?';
-    cel.dataset.juist = juist;
+    cel.dataset.juist = i * n;
     cel.dataset.waarde = '';
     cel.setAttribute('role', 'button');
     cel.setAttribute('aria-label', `${i} keer ${n}`);
-    cel.addEventListener('click', () => selecteerTafelCel(cel, rij));
+    cel.addEventListener('click', () => selecteerTafelCel(cel));
     rij.appendChild(cel);
     lijst.appendChild(rij);
   }
-  bouwTafelNumpad();
-  document.getElementById('t-numpad').classList.remove('actief');
-  // numpad blijft verborgen tot een vak wordt aangetikt
+  $('t-numpad').classList.remove('actief');
 }
 
-function bouwTafelNumpad() {
-  const pad = document.getElementById('t-numpad');
-  pad.innerHTML = '';
-  const layout = ['1','2','3','4','5','6','7','8','9','⌫','0','✓'];
-  layout.forEach(k => {
-    const btn = document.createElement('button');
-    if (k === '⌫') { btn.className = 'num-btn del'; btn.innerHTML = '⌫'; btn.onclick = () => tafelNumpadTik('del'); }
-    else if (k === '✓') { btn.className = 'num-btn ok'; btn.innerHTML = '✓'; btn.onclick = () => tafelNumpadTik('ok'); }
-    else { btn.className = 'num-btn'; btn.textContent = k; btn.onclick = () => tafelNumpadTik(k); }
-    pad.appendChild(btn);
-  });
-}
-
-function selecteerTafelCel(cel, rij) {
-  if (tafelSelectie) tafelSelectie.cel.classList.remove('selected');
-  tafelSelectie = { cel, rij };
+function selecteerTafelCel(cel) {
+  if (cel.dataset.ok === '1') return; // goede antwoorden blijven staan
+  if (tafelSelectie) tafelSelectie.classList.remove('selected');
+  tafelSelectie = cel;
   cel.classList.add('selected');
-  document.getElementById('t-numpad').classList.add('actief');
+  $('t-numpad').classList.add('actief');
+}
+
+function schudRij(rij) {
+  rij.classList.remove('fout');
+  void rij.offsetWidth;
+  rij.classList.add('fout');
+  setTimeout(() => rij.classList.remove('fout'), 400);
 }
 
 function tafelNumpadTik(k) {
-  if (!tafelSelectie) return;
-  const { cel, rij } = tafelSelectie;
-  let waarde = cel.dataset.waarde || '';
+  const cel = tafelSelectie;
+  if (!cel || cel.dataset.ok === '1') return;
+  if (k === 'ok') { gaNaarVolgendeTafelCel(); return; }
+  let waarde = cel.dataset.waarde;
   if (k === 'del') {
     waarde = waarde.slice(0, -1);
-  } else if (k === 'ok') {
-    gaNaarVolgendeTafelCel();
-    return;
   } else {
     if (waarde.length >= 3) return;
-    if (waarde === '0') return;
+    if (waarde === '' && k === '0') { schudRij(cel.parentElement); return; }
     waarde += k;
   }
   cel.dataset.waarde = waarde;
-  cel.textContent = waarde === '' ? '?' : waarde;
+  cel.textContent = waarde || '?';
   cel.classList.toggle('leeg', waarde === '');
-  controleerTafelRij(cel, rij);
+  controleerTafelCel(cel);
 }
 
 function gaNaarVolgendeTafelCel() {
   const cellen = [...document.querySelectorAll('#t-lijst .tr-input')];
-  const idx = cellen.indexOf(tafelSelectie.cel);
+  const idx = cellen.indexOf(tafelSelectie);
   for (let j = 1; j <= cellen.length; j++) {
     const kandidaat = cellen[(idx + j) % cellen.length];
-    if (kandidaat.dataset.ok !== '1') {
-      selecteerTafelCel(kandidaat, kandidaat.parentElement);
-      return;
-    }
+    if (kandidaat.dataset.ok !== '1') { selecteerTafelCel(kandidaat); return; }
   }
 }
 
-function controleerTafelRij(cel, rij) {
-  const waarde = (cel.dataset.waarde || '').trim();
-  const juist = parseInt(cel.dataset.juist);
-  rij.classList.remove('goed', 'fout');
-  if (waarde === '') { cel.dataset.ok = ''; return; }
-  const ingevoerd = parseInt(waarde);
-  if (ingevoerd === juist) {
+function controleerTafelCel(cel) {
+  const rij = cel.parentElement;
+  const waarde = cel.dataset.waarde;
+  const juist = cel.dataset.juist;
+  rij.classList.remove('goed');
+  if (waarde === juist) {
     rij.classList.add('goed');
     cel.dataset.ok = '1';
     cel.classList.remove('selected');
-    checkTafelKlaar();
-    setTimeout(gaNaarVolgendeTafelCel, 250);
-  } else {
-    cel.dataset.ok = '';
-    // alleen "fout" tonen als het getal niet meer kan groeien tot het juiste antwoord
-    if (waarde.length >= String(juist).length) {
-      rij.classList.add('fout');
-      setTimeout(() => rij.classList.remove('fout'), 400);
-    }
+    if (!checkTafelKlaar()) setTimeout(gaNaarVolgendeTafelCel, 250);
+  } else if (waarde.length >= juist.length) {
+    // pas "fout" tonen als het getal niet meer kan groeien tot het juiste antwoord
+    schudRij(rij);
   }
 }
 
 function checkTafelKlaar() {
-  const cellen = document.querySelectorAll('#t-lijst .tr-input');
-  const alleGoed = [...cellen].length === 10 && [...cellen].every(c => c.dataset.ok === '1');
-  if (alleGoed && !tafelKlaarGevierd) {
-    tafelKlaarGevierd = true;
-    if (tafelSelectie) tafelSelectie.cel.classList.remove('selected');
-    document.getElementById('t-numpad').classList.remove('actief');
-    startConfetti();
-  }
+  const cellen = [...document.querySelectorAll('#t-lijst .tr-input')];
+  if (tafelKlaarGevierd || !cellen.every(c => c.dataset.ok === '1')) return false;
+  tafelKlaarGevierd = true;
+  tafelSelectie = null;
+  $('t-numpad').classList.remove('actief');
+  $('t-lijst-sub').textContent = 'Hele tafel goed, knap gedaan!';
+  startConfetti();
+  return true;
 }
 
 function toonTafelKeuze() {
-  document.getElementById('t-kies-card').style.display = 'block';
-  document.getElementById('t-lijst-wrap').style.display = 'none';
-  document.getElementById('t-numpad').classList.remove('actief');
-  tafelKlaarGevierd = false;
+  toon('t-kies-card', true);
+  toon('t-lijst-wrap', false);
+  $('t-numpad').classList.remove('actief');
   tafelSelectie = null;
 }
 
 // ========== OVERHORING ==========
 const OV_TOTAAL = 10;
-let ovTafel = 0, ovSommen = [], ovIndex = 0, ovGoed = 0, ovInput = '', ovBeantwoord = false, ovAntwoorden = [];
-
-function bouwOverhoringGrid() {
-  const grid = document.getElementById('ov-tafel-grid');
-  grid.innerHTML = '';
-  for (let i = 1; i <= 10; i++) {
-    const btn = document.createElement('button');
-    btn.className = 'tafel-btn';
-    btn.id = `ov-t-${i}`;
-    btn.textContent = i;
-    btn.onclick = () => selecteerOverhoringTafel(i);
-    grid.appendChild(btn);
-  }
-}
+let ovTafel = 0, ovSommen = [], ovIndex = 0, ovGoed = 0, ovInput = '', ovBeantwoord = false;
 
 function selecteerOverhoringTafel(n) {
   ovTafel = n;
-  document.querySelectorAll('#ov-tafel-grid .tafel-btn').forEach(b => b.classList.remove('active-tafel'));
-  document.getElementById('ov-alle-btn').classList.remove('active-tafel');
-  if (n === 0) {
-    document.getElementById('ov-alle-btn').classList.add('active-tafel');
-  } else {
-    const btn = document.getElementById(`ov-t-${n}`);
-    if (btn) btn.classList.add('active-tafel');
-  }
+  markeerTafel([...document.querySelectorAll('#ov-tafel-grid .tafel-btn'), $('ov-alle-btn')],
+    n === 0 ? 'ov-alle-btn' : `ov-t-${n}`);
 }
 
 function genereerOverhoringSommen() {
-  const sommen = [];
-  if (ovTafel === 0) {
-    // alle unieke combinaties (1-10 × 1-10), commutatief ontdubbeld → géén herhaling
-    const alle = [];
-    for (let a = 1; a <= 10; a++) {
-      for (let b = a; b <= 10; b++) alle.push({ a, b });
-    }
-    const geshuffled = shuffle(alle);
-    for (let i = 0; i < OV_TOTAAL; i++) {
-      const s = geshuffled[i];
-      // willekeurig draaien zodat niet alles "klein × groot" is
-      sommen.push(Math.random() < 0.5 ? { a: s.a, b: s.b } : { a: s.b, b: s.a });
-    }
-  } else {
+  if (ovTafel !== 0) {
     const alle = [];
     for (let i = 1; i <= 10; i++) alle.push({ a: i, b: ovTafel });
-    const geshuffled = shuffle(alle);
-    for (let i = 0; i < OV_TOTAAL; i++) sommen.push(geshuffled[i % geshuffled.length]);
+    return shuffle(alle).slice(0, OV_TOTAAL);
   }
-  return sommen;
+  // alle unieke combinaties (a×b en b×a tellen als één), dan willekeurig gedraaid
+  const alle = [];
+  for (let a = 1; a <= 10; a++) for (let b = a; b <= 10; b++) alle.push({ a, b });
+  return shuffle(alle).slice(0, OV_TOTAAL).map(s => Math.random() < 0.5 ? s : { a: s.b, b: s.a });
 }
 
 function startOverhoring() {
   ovSommen = genereerOverhoringSommen();
-  ovIndex = 0; ovGoed = 0; ovAntwoorden = [];
-  document.getElementById('ov-kies-wrap').style.display = 'none';
-  document.getElementById('ov-einde-wrap').style.display = 'none';
-  document.getElementById('ov-speel-wrap').style.display = 'block';
-  bouwNumpad();
-  renderScoreDots();
+  ovIndex = 0; ovGoed = 0;
+  toon('ov-kies-wrap', false);
+  toon('ov-einde-wrap', false);
+  toon('ov-speel-wrap', true);
   renderOverhoringSom();
 }
 
 function toonOverhoringKeuze() {
-  document.getElementById('ov-kies-wrap').style.display = 'block';
-  document.getElementById('ov-speel-wrap').style.display = 'none';
-  document.getElementById('ov-einde-wrap').style.display = 'none';
+  toon('ov-kies-wrap', true);
+  toon('ov-speel-wrap', false);
+  toon('ov-einde-wrap', false);
 }
 
 function renderScoreDots() {
-  const container = document.getElementById('ov-score-dots');
+  const container = $('ov-score-dots');
   container.innerHTML = '';
-  for (let i = 0; i < OV_TOTAAL; i++) {
+  ovSommen.forEach((som, i) => {
     const dot = document.createElement('div');
     dot.className = 'score-dot';
-    dot.id = `dot-${i}`;
-    if (ovAntwoorden[i] === true) dot.classList.add('goed');
-    else if (ovAntwoorden[i] === false) dot.classList.add('fout');
+    if (som.correct === true) dot.classList.add('goed');
+    else if (som.correct === false) dot.classList.add('fout');
     if (i === ovIndex) dot.classList.add('huidig');
     container.appendChild(dot);
-  }
+  });
 }
 
 function renderOverhoringSom() {
   const som = ovSommen[ovIndex];
   ovInput = '';
   ovBeantwoord = false;
-  document.getElementById('ov-voortgang').textContent = `Vraag ${ovIndex + 1} van ${OV_TOTAAL}`;
+  $('ov-voortgang').textContent = `Vraag ${ovIndex + 1} van ${OV_TOTAAL}`;
   renderScoreDots();
-  document.getElementById('ov-som').innerHTML = `${som.a} × ${som.b} = <span class="vraagteken">?</span>`;
-  updateInputDisplay();
-}
-
-function updateInputDisplay() {
-  const el = document.getElementById('ov-input');
-  if (ovInput === '') {
-    el.className = 'input-display leeg';
-    el.textContent = 'Tik een getal';
-    document.getElementById('ov-nul-melding').style.display = 'none';
-  } else {
-    el.className = 'input-display';
-    el.textContent = ovInput;
-  }
-}
-
-function bouwNumpad() {
-  const pad = document.getElementById('ov-numpad');
-  pad.innerHTML = '';
-  const layout = ['1','2','3','4','5','6','7','8','9','⌫','0','✓'];
-  layout.forEach(k => {
-    const btn = document.createElement('button');
-    if (k === '⌫') { btn.className = 'num-btn del'; btn.textContent = '⌫'; btn.onclick = () => numpadTik('del'); }
-    else if (k === '✓') { btn.className = 'num-btn ok'; btn.textContent = '✓'; btn.onclick = () => numpadTik('ok'); }
-    else { btn.className = 'num-btn'; btn.textContent = k; btn.onclick = () => numpadTik(k); }
-    pad.appendChild(btn);
-  });
+  $('ov-som').innerHTML = `${som.a} × ${som.b} = <span class="vraagteken">?</span>`;
+  toonInvoer('ov-input', '');
 }
 
 function numpadTik(k) {
   if (ovBeantwoord) return;
-  if (k === 'del') {
-    ovInput = ovInput.slice(0, -1);
-    updateInputDisplay();
-  } else if (k === 'ok') {
-    if (ovInput === '') return;
-    controleerOverhoringAntwoord();
-  } else {
-    if (ovInput.length >= 3) return;
-    if (ovInput === '0') {
-      ovInput = '';
-      updateInputDisplay();
-      const m = document.getElementById('ov-nul-melding');
-      m.style.display = 'block';
-      setTimeout(() => { m.style.display = 'none'; }, 1800);
-      return;
-    }
-    ovInput += k;
-    updateInputDisplay();
+  if (k === 'ok') {
+    if (ovInput !== '') controleerOverhoringAntwoord();
+    return;
   }
+  const nieuw = typCijfer(ovInput, k, 'ov-nul-melding');
+  if (nieuw === null) return;
+  ovInput = nieuw;
+  toonInvoer('ov-input', ovInput);
 }
 
 function controleerOverhoringAntwoord() {
   const som = ovSommen[ovIndex];
-  const juist = som.a * som.b;
-  const ingevoerd = parseInt(ovInput);
-  const el = document.getElementById('ov-input');
-  const correct = ingevoerd === juist;
+  som.ingevoerd = parseInt(ovInput, 10);
+  som.correct = som.ingevoerd === som.a * som.b;
+  if (som.correct) ovGoed++;
   ovBeantwoord = true;
-
-  // registreer antwoord (toets gaat altijd door, ook bij fout)
-  ovAntwoorden[ovIndex] = correct;
-  ovSommen[ovIndex].ingevoerd = ingevoerd;
-  if (correct) ovGoed++;
-
-  el.className = 'input-display ' + (correct ? 'goed' : 'fout');
-  const dot = document.getElementById(`dot-${ovIndex}`);
-  if (dot) { dot.classList.remove('huidig'); dot.classList.add(correct ? 'goed' : 'fout'); }
+  toonInvoer('ov-input', ovInput, som.correct ? 'goed' : 'fout');
+  renderScoreDots();
 
   setTimeout(() => {
     ovIndex++;
     if (ovIndex >= OV_TOTAAL) toonEindresultaat();
-    else { ovInput = ''; ovBeantwoord = false; renderOverhoringSom(); }
-  }, correct ? 550 : 650);
+    else renderOverhoringSom();
+  }, som.correct ? 550 : 650);
 }
 
 function toonEindresultaat() {
-  document.getElementById('ov-speel-wrap').style.display = 'none';
-  document.getElementById('ov-einde-wrap').style.display = 'block';
-  document.getElementById('ov-einde-score').textContent = ovGoed;
-  document.getElementById('ov-einde-van').textContent = `van ${OV_TOTAAL}`;
+  toon('ov-speel-wrap', false);
+  toon('ov-einde-wrap', true);
+  $('ov-einde-score').textContent = ovGoed;
+  $('ov-einde-van').textContent = `van ${OV_TOTAAL}`;
 
-  // overzicht per som
-  const overzicht = document.getElementById('ov-overzicht');
-  overzicht.innerHTML = '';
-  ovSommen.forEach((som, i) => {
+  $('ov-overzicht').innerHTML = ovSommen.map(som => {
     const juist = som.a * som.b;
-    const correct = ovAntwoorden[i] === true;
-    const rij = document.createElement('div');
-    rij.className = 'ov-ov-rij';
-    const somHtml = correct
+    const somHtml = som.correct
       ? `${som.a} × ${som.b} = ${juist}`
-      : `${som.a} × ${som.b} = <span class="jouw">${isNaN(som.ingevoerd) ? '–' : som.ingevoerd}</span><span class="echt">${juist}</span>`;
-    rij.innerHTML = `<span class="ov-ov-icoon ${correct ? 'goed' : 'fout'}">${icon(correct ? 'check' : 'cross', 14)}</span><span class="ov-ov-som">${somHtml}</span>`;
-    overzicht.appendChild(rij);
-  });
+      : `${som.a} × ${som.b} = <span class="jouw">${som.ingevoerd}</span><span class="echt">${juist}</span>`;
+    return `<div class="ov-ov-rij"><span class="ov-ov-icoon ${som.correct ? 'goed' : 'fout'}">${icon(som.correct ? 'check' : 'cross', 14)}</span><span class="ov-ov-som">${somHtml}</span></div>`;
+  }).join('');
 
   const pct = ovGoed / OV_TOTAAL;
-  let ic, tekst, kleur;
-  if (pct === 1) { ic = 'trophy'; tekst = 'Perfect! Geweldig!'; kleur = 'var(--mustard)'; }
-  else if (pct >= 0.8) { ic = 'star'; tekst = 'Super goed gedaan!'; kleur = 'var(--mustard)'; }
-  else if (pct >= 0.6) { ic = 'thumb'; tekst = 'Goed bezig!'; kleur = 'var(--sky)'; }
-  else { ic = 'rocket'; tekst = 'Blijf oefenen!'; kleur = 'var(--terracotta)'; }
-  document.getElementById('ov-einde-emoji').innerHTML = `<span style="color:${kleur};display:inline-flex">${icon(ic, 52)}</span>`;
-  document.getElementById('ov-beoordeling').textContent = tekst;
-  document.getElementById('ov-beoordeling').style.color = kleur;
+  const [ic, tekst, kleur] =
+    pct === 1   ? ['trophy', 'Perfect! Geweldig!', 'var(--mustard)'] :
+    pct >= 0.8  ? ['star', 'Super goed gedaan!', 'var(--mustard)'] :
+    pct >= 0.6  ? ['thumb', 'Goed bezig!', 'var(--sky)'] :
+                  ['rocket', 'Blijf oefenen!', 'var(--terracotta)'];
+  $('ov-einde-emoji').innerHTML = `<span style="color:${kleur};display:inline-flex">${icon(ic, 52)}</span>`;
+  $('ov-beoordeling').textContent = tekst;
+  $('ov-beoordeling').style.color = kleur;
   if (pct >= 0.8) startConfetti();
 }
 
+// ========== TOETSENBORD (desktop) ==========
+document.addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = /^[0-9]$/.test(e.key) ? e.key : e.key === 'Backspace' ? 'del' : e.key === 'Enter' ? 'ok' : null;
+  if (!k) return;
+  if (actieveTab === 'overhoring' && $('ov-speel-wrap').style.display !== 'none') numpadTik(k);
+  else if (actieveTab === 'oefenen' && oModus === 'typ') oefenNumpadTik(k);
+  else if (actieveTab === 'tafels' && tafelSelectie) tafelNumpadTik(k);
+  else return;
+  e.preventDefault();
+});
+
 // ========== INIT ==========
 renderIcons();
-bouwTafelGrid();
-bouwOverhoringGrid();
+maakTafelKnoppen($('t-tafel-grid'), 't-t', startTafel);
+maakTafelKnoppen($('ov-tafel-grid'), 'ov-t', selecteerOverhoringTafel);
+maakNumpad($('t-numpad'), tafelNumpadTik);
+maakNumpad($('ov-numpad'), numpadTik);
+maakNumpad($('o-numpad'), oefenNumpadTik);
 selecteerOverhoringTafel(0);
-nieuweOefenSom();
+bouwOefenGrid();
 </script>
 </body>
 </html>

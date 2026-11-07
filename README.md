@@ -1,34 +1,38 @@
 # Tafelspel
 
-Een speels tafels-oefenspel voor kinderen van groep 3/4 (ca. 6–8 jaar). Gebouwd als één HTML-bestand zonder dependencies — werkt direct in de browser, ook op iPad en tablet.
+Een speels oefenspel voor de tafels van 1 t/m 10, voor kinderen van groep 3/4 (ca. 6 tot 8 jaar). Eén HTML-bestand zonder dependencies dat direct in de browser werkt, ook op iPad en tablet.
 
-🔗 **Live spelen:** [colorcodednl.github.io/Tafelspel](https://colorcodednl.github.io/Tafelspel/)
+**Live spelen:** [colorcodednl.github.io/Tafelspel](https://colorcodednl.github.io/Tafelspel/)
 
 ---
 
 ## Wat het doet
 
-Het spel bestaat uit drie modi:
+Het spel heeft drie onderdelen, in de volgorde waarin je een tafel leert:
 
-### 🎲 Oefenen
-Een willekeurige som verschijnt met een visuele weergave als groepjes bolletjes — zodat het kind ziet wat vermenigvuldigen betekent. Vier antwoordknoppen om uit te kiezen. Bij het goede antwoord verschijnt confetti en een knop voor de volgende som.
+### Tafels
+Kies een tafel (1 t/m 10) en vul de hele tafel in, van `1 × 3` tot `10 × 3`. Tik een rij aan en typ het antwoord met het cijferpad. Een goed antwoord kleurt groen en je springt vanzelf naar de volgende rij. Als de hele tafel goed is volgt confetti.
 
-### 📋 Tafels
-Het kind kiest een tafel (1 t/m 10) en doorloopt alle sommen in volgorde (×1 t/m ×10), ook met visuele bolletjes. Een voortgangsbalk toont hoever je bent. Als de hele tafel klaar is volgt confetti en een eindscherm.
+### Oefenen
+Losse sommen met hulp: elke som wordt getoond als rijen bolletjes, zodat je ziet wat vermenigvuldigen betekent. Kies een specifieke tafel of "Alle", en kies hoe je antwoordt:
+- **Kiezen:** vier antwoordknoppen. De foute opties liggen dicht bij het goede antwoord (bijv. `7 × 3` geeft ook 18 en 24), zodat raden niet werkt.
+- **Zelf typen:** antwoord intypen met het cijferpad. Fout is niet erg, je mag het opnieuw proberen.
 
-### ⭐ Overhoring
-Geen hulp, geen bolletjes — gewoon de som invullen via een cijferpad. Het kind kiest van tevoren een specifieke tafel of "alle tafels door elkaar". Na 10 vragen verschijnt het eindresultaat met score (bijv. 8/10) en een overzicht van alle sommen.
+Geen score, gewoon spelen.
+
+### Overhoring
+Geen hulp en geen bolletjes. Kies een tafel of "alle tafels door elkaar" en beantwoord 10 sommen met het cijferpad. Elke som komt één keer voor. Aan het eind zie je je score (bijv. 9 van 10) en een overzicht van wat goed en fout ging.
 
 ---
 
 ## Kenmerken
 
-- Geen installatie — gewoon `index.html` openen in de browser
-- Werkt op iPad, tablet en desktop
-- Visuele bolletjes bij Oefenen en Tafels om het begrip te ondersteunen
-- Score alleen bij Overhoring, zodat Oefenen en Tafels laagdrempelig blijven
-- Confetti-animatie bij goed antwoord
-- Warm, speels design met Fredoka-lettertype
+- Geen installatie, gewoon `index.html` openen
+- Gemaakt voor iPad (staand en liggend), werkt ook op desktop
+- Op desktop kun je ook typen met het toetsenbord (cijfers, Backspace, Enter)
+- Een antwoord kan niet met een 0 beginnen; het spel geeft dan een korte melding
+- Confetti bij een goed antwoord of een complete tafel
+- Speels design met het Fredoka-lettertype
 
 ---
 
@@ -36,28 +40,28 @@ Geen hulp, geen bolletjes — gewoon de som invullen via een cijferpad. Het kind
 
 ```bash
 git clone https://github.com/ColorcodedNL/Tafelspel.git
-open index.html
+open Tafelspel/index.html
 ```
 
-Of speel direct online via GitHub Pages: https://colorcodednl.github.io/Tafelspel/
+Of speel direct online via GitHub Pages.
 
 ---
 
 ## Bestanden
 
-- `index.html` — het volledige spel
-- `tafelspel-favicon-32.png`, `tafelspel-favicon-192.png`, `tafelspel-apple-touch-icon.png` — pictogrammen
+- `index.html`: het volledige spel
+- `tafelspel-favicon-32.png`, `tafelspel-favicon-192.png`, `tafelspel-apple-touch-icon.png`: pictogrammen
 
-De lettertypes (Fredoka & Nunito) laden van Google Fonts; een internetverbinding is vereist.
+Het lettertype Fredoka laadt van Google Fonts. Zonder internet valt het spel terug op het systeemlettertype en blijft het gewoon werken.
 
 ---
 
 ## Achtergrond
 
-Gemaakt voor mijn dochter (6 jaar) om de tafels te oefenen op de iPad. De drie modi sluiten aan bij de verschillende leerfases: eerst begrijpen wat vermenigvuldigen is (Oefenen), dan een tafel instuderen (Tafels), en tenslotte jezelf testen (Overhoring).
+Gemaakt voor mijn dochter om de tafels te oefenen op de iPad. De drie onderdelen sluiten aan bij de leerfases: eerst een tafel instuderen (Tafels), dan losse sommen oefenen met hulp (Oefenen) en tot slot jezelf testen (Overhoring).
 
 ---
 
 ## Licentie
 
-MIT — gebruik en pas gerust aan.
+MIT, gebruik en pas gerust aan.
