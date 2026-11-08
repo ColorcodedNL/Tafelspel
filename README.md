@@ -30,6 +30,8 @@ Geen hulp en geen bolletjes. Kies een tafel of "alle tafels door elkaar" en bean
 - Geen installatie, gewoon `index.html` openen
 - Gemaakt voor iPad (staand en liggend), werkt ook op desktop
 - Op desktop kun je ook typen met het toetsenbord (cijfers, Backspace, Enter)
+- Eerlijke verdeling: alle sommen komen langs voordat er één dubbel komt (10 beurten bij één tafel, 55 bij alle tafels), ook over meerdere rondes en dagen heen
+- Een fout beantwoorde som komt binnen een paar beurten terug
 - Een antwoord kan niet met een 0 beginnen; het spel geeft dan een korte melding
 - Confetti bij een goed antwoord of een complete tafel
 - Speels design met het Fredoka-lettertype
