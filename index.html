@@ -634,6 +634,91 @@ body::after {
 /* Confetti canvas */
 #confetti-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9999; }
 
+/* Schud-animatie: sommen gaan in de zak en de zak wordt geschud */
+.zak-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(250, 244, 230, 0.88);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+}
+.zak-overlay.speel { visibility: visible; animation: zak-in-uit 2.3s ease forwards; pointer-events: auto; }
+@keyframes zak-in-uit {
+  0%   { opacity: 0; }
+  8%   { opacity: 1; }
+  86%  { opacity: 1; }
+  100% { opacity: 0; visibility: hidden; }
+}
+.zak-podium { position: relative; width: 190px; height: 200px; }
+.zak-svg { position: absolute; left: 15px; bottom: 0; width: 160px; height: 170px; transform-origin: 50% 95%; }
+.zak-overlay.speel .zak-svg { animation: zak-land .35s ease-out backwards, zak-schud 1s .8s ease-in-out; }
+@keyframes zak-land {
+  from { transform: translateY(30px) scale(.8); opacity: 0; }
+}
+@keyframes zak-schud {
+  0%, 100% { transform: rotate(0) translateX(0); }
+  10% { transform: rotate(-11deg) translateX(-8px); }
+  22% { transform: rotate(10deg) translateX(8px) translateY(-6px); }
+  34% { transform: rotate(-9deg) translateX(-7px); }
+  46% { transform: rotate(8deg) translateX(7px) translateY(-4px); }
+  58% { transform: rotate(-6deg) translateX(-4px); }
+  70% { transform: rotate(5deg) translateX(3px) translateY(-2px); }
+  84% { transform: rotate(-2deg); }
+}
+.zak-ballen { position: absolute; left: 50%; top: 52px; width: 0; height: 0; }
+.zak-bal {
+  position: absolute;
+  left: -19px;
+  top: -19px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  box-shadow: inset 0 -3px 0 rgba(0,0,0,0.15), 0 2px 0 rgba(31,58,77,0.2);
+  opacity: 0;
+}
+.zak-overlay.speel .zak-bal { animation: zak-bal-in .55s cubic-bezier(.45,-0.2,.7,.6) forwards; }
+@keyframes zak-bal-in {
+  0%   { opacity: 1; transform: translate(var(--x), var(--y)) rotate(var(--r)) scale(1); }
+  55%  { opacity: 1; transform: translate(calc(var(--x) * .35), calc(var(--y) * .35 - 40px)) rotate(0) scale(1); }
+  100% { opacity: 0; transform: translate(0, 10px) scale(.35); }
+}
+.zak-streep { opacity: 0; }
+.zak-overlay.speel .zak-streep { animation: zak-streep .25s .85s 4 alternate; }
+@keyframes zak-streep { from { opacity: 0; } to { opacity: 1; } }
+.zak-tekst { position: relative; height: 34px; margin-top: 18px; width: 300px; text-align: center; }
+.zak-tekst span {
+  position: absolute;
+  inset: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--ink);
+  opacity: 0;
+}
+.zak-tekst .t2 { color: var(--terracotta); font-size: 30px; }
+.zak-overlay.speel .t1 { animation: zak-t1 .8s ease forwards; }
+.zak-overlay.speel .t2 { animation: zak-t2 1.3s .8s ease forwards; }
+@keyframes zak-t1 { 0%, 15% { opacity: 0; transform: translateY(6px); } 30%, 80% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+@keyframes zak-t2 { 0% { opacity: 0; transform: scale(.6); } 20% { opacity: 1; transform: scale(1.12); } 30%, 100% { opacity: 1; transform: scale(1); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .zak-overlay.speel .zak-svg, .zak-overlay.speel .zak-streep { animation: none; }
+  .zak-overlay.speel .zak-streep { opacity: 1; }
+}
+
 @media (orientation: landscape) and (max-height: 600px) {
   .app { padding: 8px 12px 16px; }
   .header { margin-bottom: 8px; }
@@ -661,6 +746,37 @@ body::after {
 </head>
 <body>
 <canvas id="confetti-canvas"></canvas>
+<div class="zak-overlay" id="zak-overlay" aria-live="polite" onclick="this.classList.remove('speel')">
+  <div class="zak-podium">
+    <svg class="zak-svg" viewBox="0 0 160 170" aria-hidden="true">
+      <!-- schudstreepjes -->
+      <g class="zak-streep" stroke="#1F3A4D" stroke-width="4" stroke-linecap="round" fill="none">
+        <path d="M8 95 Q2 110 8 125"/><path d="M-2 88 Q-10 110 -2 132"/>
+        <path d="M152 95 Q158 110 152 125"/><path d="M162 88 Q170 110 162 132"/>
+      </g>
+      <!-- zak -->
+      <path d="M40 62 C18 85 14 140 34 156 C55 170 105 170 126 156 C146 140 142 85 120 62 Z"
+            fill="#E3B26A" stroke="#1F3A4D" stroke-width="4" stroke-linejoin="round"/>
+      <!-- lichte zijde -->
+      <path d="M48 78 C36 98 34 128 44 146" fill="none" stroke="#F3D398" stroke-width="7" stroke-linecap="round"/>
+      <!-- touw -->
+      <path d="M38 66 Q80 78 122 66" fill="none" stroke="#C9412F" stroke-width="6" stroke-linecap="round"/>
+      <!-- opening -->
+      <path d="M36 60 C40 38 120 38 124 60 C112 70 48 70 36 60 Z" fill="#E3B26A" stroke="#1F3A4D" stroke-width="4" stroke-linejoin="round"/>
+      <ellipse cx="80" cy="56" rx="34" ry="8" fill="#7A4E22"/>
+      <!-- label met keer-teken -->
+      <circle cx="80" cy="116" r="22" fill="#FFF6DC" stroke="#1F3A4D" stroke-width="3.5"/>
+      <path d="M71 107 L89 125 M89 107 L71 125" stroke="#EE5B4C" stroke-width="5" stroke-linecap="round"/>
+      <!-- steekjes -->
+      <path d="M30 120 l6 3 M28 132 l6 2 M131 120 l-6 3 M133 132 l-6 2" stroke="#1F3A4D" stroke-width="2.5" stroke-linecap="round"/>
+    </svg>
+    <div class="zak-ballen" id="zak-ballen"></div>
+  </div>
+  <div class="zak-tekst">
+    <span class="t1">Alle sommen in de zak…</span>
+    <span class="t2">Schudden!</span>
+  </div>
+</div>
 <div class="app">
   <div class="header">
     <h1>Tafel<span>spel</span> <span class="ico-times" data-icon="times" data-size="30"></span></h1>
@@ -877,35 +993,39 @@ function shuffle(arr) {
 // pas dan wordt opnieuw geschud. Zo komt elke som langs voordat er één dubbel komt.
 // Oefenen en Overhoring delen dezelfde zak en hij wordt in de browser bewaard,
 // dus dit loopt door over rondes heen en na het sluiten van de app.
-// Tafel 0 = alle tafels: 55 sommen, want 3×7 en 7×3 tellen als één.
+// Tafel 0 = alle tafels: 100 sommen. 3×7 en 7×3 zijn aparte sommen, ze moeten allebei geoefend worden.
 const zakken = {};
 
-function sleutel(p) { return Math.min(p[0], p[1]) + 'x' + Math.max(p[0], p[1]); }
+function sleutel(p) { return p[0] + 'x' + p[1]; }
 
 function vulZak(tafel) {
   const s = [];
   if (tafel) for (let i = 1; i <= 10; i++) s.push([i, tafel]);
-  else for (let a = 1; a <= 10; a++) for (let b = a; b <= 10; b++) s.push([a, b]);
+  else for (let a = 1; a <= 10; a++) for (let b = 1; b <= 10; b++) s.push([a, b]);
   return shuffle(s);
 }
 
 function zak(tafel) {
   if (!zakken[tafel]) {
     let z = [];
-    try { z = JSON.parse(localStorage.getItem('tafelspel-zak-' + tafel)) || []; } catch (e) { z = []; }
+    try { z = JSON.parse(localStorage.getItem('tafelspel-zak2-' + tafel)) || []; } catch (e) { z = []; }
     zakken[tafel] = Array.isArray(z) ? z : [];
   }
   return zakken[tafel];
 }
 
 function bewaarZak(tafel) {
-  try { localStorage.setItem('tafelspel-zak-' + tafel, JSON.stringify(zakken[tafel])); } catch (e) {}
+  try { localStorage.setItem('tafelspel-zak2-' + tafel, JSON.stringify(zakken[tafel])); } catch (e) {}
 }
 
 // Trek de volgende som; 'vermijd' zijn sommen die net al geweest zijn (geen dubbel in één ronde)
 function trekSom(tafel, vermijd = []) {
   const z = zak(tafel);
-  if (z.length === 0) z.push(...vulZak(tafel));
+  if (z.length === 0) {
+    const nieuw = vulZak(tafel);
+    z.push(...nieuw);
+    schudAnimatie(nieuw.map(p => p[0] * p[1]));
+  }
   const verboden = new Set(vermijd.map(sleutel));
   const zoek = () => {
     for (let i = z.length - 1; i >= 0; i--) if (!verboden.has(sleutel(z[i]))) return i;
@@ -921,8 +1041,33 @@ function trekSom(tafel, vermijd = []) {
   }
   const [p] = z.splice(idx, 1);
   bewaarZak(tafel);
-  if (tafel) return { a: p[0], b: tafel };
-  return Math.random() < 0.5 ? { a: p[0], b: p[1] } : { a: p[1], b: p[0] };
+  return tafel ? { a: p[0], b: tafel } : { a: p[0], b: p[1] };
+}
+
+// Balletjes met antwoorden uit de zak vliegen erin, daarna wordt geschud
+let zakTimer = null;
+function schudAnimatie(getallen) {
+  const ov = $('zak-overlay');
+  const ballen = $('zak-ballen');
+  const kleuren = ['#2B8AE0', '#EE5B4C', '#E0A920', '#1FAFB8', '#9B7BC2', '#5BBE7C'];
+  ballen.innerHTML = '';
+  getallen.slice(0, 6).forEach((n, i) => {
+    const bal = document.createElement('div');
+    bal.className = 'zak-bal';
+    bal.textContent = n;
+    const links = i % 2 === 0 ? -1 : 1;
+    bal.style.setProperty('--x', `${links * (70 + (i >> 1) * 35)}px`);
+    bal.style.setProperty('--y', `${-50 - (i >> 1) * 22}px`);
+    bal.style.setProperty('--r', `${links * 40}deg`);
+    bal.style.background = kleuren[i % kleuren.length];
+    bal.style.animationDelay = `${120 + i * 85}ms`;
+    ballen.appendChild(bal);
+  });
+  ov.classList.remove('speel');
+  void ov.offsetWidth; // animatie opnieuw starten
+  ov.classList.add('speel');
+  clearTimeout(zakTimer);
+  zakTimer = setTimeout(() => ov.classList.remove('speel'), 2300);
 }
 
 // Een fout beantwoorde som komt binnen een paar beurten nog een keer terug
@@ -1090,7 +1235,7 @@ function selecteerOefenTafel(n) {
 }
 
 function nieuweOefenSom() {
-  const { a, b } = trekSom(oTafel, oVorigA ? [[oVorigA, oVorigB]] : []);
+  const { a, b } = trekSom(oTafel, oVorigA ? [[oVorigA, oVorigB], [oVorigB, oVorigA]] : []);
   oVorigA = a; oVorigB = b;
   oFoutGemeld = false;
   toonOefenSom();
