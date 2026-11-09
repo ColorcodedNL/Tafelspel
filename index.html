@@ -719,6 +719,78 @@ body::after {
   .zak-overlay.speel .zak-streep { opacity: 1; }
 }
 
+/* ===== Tablet (iPad staand en liggend): onderdelen naast elkaar ===== */
+@media (min-width: 700px) {
+  .app { max-width: 980px; }
+  .tabs { max-width: 560px; margin-left: auto; margin-right: auto; }
+  .card { padding: 22px 26px; }
+
+  /* Oefenen: tafelkeuze op één rij */
+  .oef-kies { grid-template-columns: 1.7fr repeat(10, 1fr); }
+  .oef-kies .tafel-btn.alle { grid-column: auto; }
+
+  /* Som links, antwoord rechts */
+  .speel-vlak {
+    display: grid;
+    grid-template-columns: 1fr minmax(300px, 380px);
+    gap: 28px;
+    align-items: center;
+  }
+  .speel-vlak .som-display { margin-bottom: 0; }
+  .speel-vlak .som-tekst { font-size: 60px; }
+  .speel-vlak .antwoord-grid,
+  .speel-vlak .nummerpad-wrap { margin-top: 0; }
+  .antwoord-vlak .goed-banner { margin-top: 14px; }
+  #o-typ .goed-banner { margin-top: 0; }
+
+  /* Tafels: lijst links, cijferpad rechts en altijd in beeld */
+  .tafel-body {
+    display: grid;
+    grid-template-columns: 1fr minmax(260px, 320px);
+    gap: 24px;
+    align-items: start;
+  }
+  .tafel-lijst { gap: 6px; }
+  .tafel-rij { padding: 7px 14px; }
+  .tr-input { min-height: 40px; }
+  .tafel-numpad {
+    display: grid;
+    margin-top: 0;
+    position: sticky;
+    top: 12px;
+    bottom: auto;
+    opacity: .45;
+  }
+  .tafel-numpad.actief { opacity: 1; }
+}
+/* Breed (iPad liggend): tafel-lijst in twee kolommen */
+@media (min-width: 900px) {
+  .tafel-lijst {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: repeat(5, auto);
+    grid-auto-flow: column;
+    column-gap: 12px;
+  }
+}
+/* Tablet met weinig hoogte (iPad liggend): kop compacter */
+@media (min-width: 700px) and (max-height: 820px) {
+  .app { padding-top: 10px; padding-bottom: 16px; }
+  .header { margin-bottom: 10px; }
+  .header h1 { font-size: 28px; }
+  .tabs { margin-bottom: 12px; }
+  .tab { padding: 8px 6px; }
+  .card { padding: 16px 22px; }
+  .oef-kies { margin-bottom: 12px; }
+  .modus-keuze { margin-bottom: 12px; }
+  .tafel-lijst-sub { margin-bottom: 10px; }
+  .num-btn { padding: 13px 10px; }
+  .input-display { min-height: 64px; padding: 9px; font-size: 40px; }
+  .bolletje { width: 22px; height: 22px; }
+  .bolletjes-wrap { gap: 5px; }
+  .bolletjes-rij { gap: 5px; }
+}
+
 @media (orientation: landscape) and (max-height: 600px) {
   .app { padding: 8px 12px 16px; }
   .header { margin-bottom: 8px; }
@@ -796,21 +868,25 @@ body::after {
         <button class="modus-btn actief" id="o-modus-kies" onclick="zetOefenModus('kies')">Kiezen</button>
         <button class="modus-btn" id="o-modus-typ" onclick="zetOefenModus('typ')">Zelf typen</button>
       </div>
-      <div class="som-display">
-        <div class="som-tekst" id="o-som">? × ? = <span class="vraagteken">?</span></div>
-        <div class="bolletjes-wrap" id="o-bolletjes"></div>
+      <div class="speel-vlak">
+        <div class="som-display">
+          <div class="som-tekst" id="o-som">? × ? = <span class="vraagteken">?</span></div>
+          <div class="bolletjes-wrap" id="o-bolletjes"></div>
+        </div>
+        <div class="antwoord-vlak">
+          <div class="antwoord-grid" id="o-knoppen"></div>
+          <div class="nummerpad-wrap" id="o-typ" style="display:none">
+            <div class="input-display leeg" id="o-input">Tik een getal</div>
+            <div class="nul-melding" id="o-nul-melding">Een antwoord begint nooit met 0!</div>
+            <div class="nummerpad" id="o-numpad"></div>
+          </div>
+          <div id="o-goed" style="display:none" class="goed-banner">
+            <span class="goed-emoji" data-icon="sparkle" data-size="40"></span>
+            <div class="goed-tekst">Goed gedaan!</div>
+            <button class="volgende-btn" onclick="nieuweOefenSom()">Volgende som →</button>
+          </div>
+        </div>
       </div>
-      <div class="antwoord-grid" id="o-knoppen"></div>
-      <div class="nummerpad-wrap" id="o-typ" style="display:none">
-        <div class="input-display leeg" id="o-input">Tik een getal</div>
-        <div class="nul-melding" id="o-nul-melding">Een antwoord begint nooit met 0!</div>
-        <div class="nummerpad" id="o-numpad"></div>
-      </div>
-    </div>
-    <div id="o-goed" style="display:none" class="goed-banner">
-      <span class="goed-emoji" data-icon="sparkle" data-size="40"></span>
-      <div class="goed-tekst">Goed gedaan!</div>
-      <button class="volgende-btn" onclick="nieuweOefenSom()">Volgende som →</button>
     </div>
   </div>
 
@@ -824,8 +900,10 @@ body::after {
       <div class="card">
         <div class="tafel-lijst-titel" id="t-lijst-titel">Tafel van 1</div>
         <div class="tafel-lijst-sub" id="t-lijst-sub">Tik een rij aan en typ het antwoord</div>
-        <div class="tafel-lijst" id="t-lijst"></div>
-        <div class="tafel-numpad" id="t-numpad"></div>
+        <div class="tafel-body">
+          <div class="tafel-lijst" id="t-lijst"></div>
+          <div class="tafel-numpad" id="t-numpad"></div>
+        </div>
       </div>
       <div class="btn-rij">
         <button class="actie-btn secundair" onclick="toonTafelKeuze()">Andere tafel</button>
@@ -850,13 +928,15 @@ body::after {
       <div class="card">
         <div class="ov-voortgang" id="ov-voortgang">Vraag 1 van 10</div>
         <div class="score-display" id="ov-score-dots"></div>
-        <div class="som-display">
-          <div class="som-tekst" id="ov-som">— × — = <span class="vraagteken">?</span></div>
-        </div>
-        <div class="nummerpad-wrap">
-          <div class="input-display leeg" id="ov-input">Tik een getal</div>
-          <div class="nul-melding" id="ov-nul-melding">Een antwoord begint nooit met 0!</div>
-          <div class="nummerpad" id="ov-numpad"></div>
+        <div class="speel-vlak">
+          <div class="som-display">
+            <div class="som-tekst" id="ov-som">— × — = <span class="vraagteken">?</span></div>
+          </div>
+          <div class="nummerpad-wrap">
+            <div class="input-display leeg" id="ov-input">Tik een getal</div>
+            <div class="nul-melding" id="ov-nul-melding">Een antwoord begint nooit met 0!</div>
+            <div class="nummerpad" id="ov-numpad"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -1190,6 +1270,14 @@ function zetOefenModus(m) {
 function oefenGoed() {
   oKlaar = true;
   startConfetti();
+  if (oModus === 'typ') {
+    // banner komt op de plek van het cijferpad, zodat niets onder de rand verdwijnt
+    toon('o-numpad', false);
+    $('o-nul-melding').classList.remove('zichtbaar');
+    $('o-typ').appendChild($('o-goed'));
+  } else {
+    $('o-knoppen').after($('o-goed'));
+  }
   toon('o-goed', true);
 }
 
@@ -1250,6 +1338,7 @@ function toonOefenSom() {
   oInput = '';
   toon('o-knoppen', oModus === 'kies');
   toon('o-typ', oModus === 'typ');
+  toon('o-numpad', true);
   if (oModus === 'kies') maakAntwoordKnoppen($('o-knoppen'), a, b, oefenGoed, oefenFout);
   else toonInvoer('o-input', '');
 }
@@ -1281,7 +1370,8 @@ function startTafel(n) {
     rij.appendChild(cel);
     lijst.appendChild(rij);
   }
-  $('t-numpad').classList.remove('actief');
+  // meteen de eerste rij klaarzetten, dan kan ze direct typen
+  selecteerTafelCel(lijst.querySelector('.tr-input'));
 }
 
 function selecteerTafelCel(cel) {
