@@ -31,7 +31,8 @@ Geen hulp en geen bolletjes. Kies een tafel of "alle tafels door elkaar" en bean
 - Gemaakt voor iPad (staand en liggend), werkt ook op desktop
 - Op desktop kun je ook typen met het toetsenbord (cijfers, Backspace, Enter)
 - Eerlijke verdeling: alle sommen komen langs voordat er één dubbel komt (10 beurten bij één tafel, 100 bij alle tafels; 3 × 7 en 7 × 3 zijn aparte sommen), ook over meerdere rondes en dagen heen
-- Een fout beantwoorde som komt binnen een paar beurten terug
+- Onder de som zie je hoeveel sommen er nog in de zak zitten
+- Een som komt nooit twee keer achter elkaar, ook niet bij de overgang naar een nieuwe ronde
 - Als de zak leeg is, vliegen alle sommen er opnieuw in en wordt de zak geschud (korte animatie)
 - Een antwoord kan niet met een 0 beginnen; het spel geeft dan een korte melding
 - Confetti bij een goed antwoord of een complete tafel

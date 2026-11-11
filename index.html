@@ -184,7 +184,7 @@ body::after {
 }
 .som-tekst .vraagteken { color: var(--terracotta); }
 
-/* Regel onder de som: zak-teller of herkansing */
+/* Regel onder de som: zak-teller */
 .som-label {
   height: 26px;
   margin-top: 8px;
@@ -197,12 +197,6 @@ body::after {
   color: var(--brown-mid);
 }
 .som-label svg { color: #C98A3A; }
-.som-label.herkansing span {
-  background: var(--terracotta-soft);
-  color: var(--terracotta);
-  padding: 3px 12px;
-  border-radius: 999px;
-}
 .som-label.leeg { visibility: hidden; }
 
 /* Bolletjes */
@@ -953,7 +947,6 @@ body::after {
         <div class="speel-vlak">
           <div class="som-display">
             <div class="som-tekst" id="ov-som">— × — = <span class="vraagteken">?</span></div>
-            <div class="som-label" id="ov-label"></div>
           </div>
           <div class="nummerpad-wrap">
             <div class="input-display leeg" id="ov-input">Tik een getal</div>
@@ -1130,7 +1123,9 @@ function trekSom(tafel, vermijd = []) {
     z.push(...nieuw);
     schudAnimatie(nieuw.map(p => p[0] * p[1]));
   }
-  const verboden = new Set(vermijd.map(sleutel));
+  // ook de laatst getrokken som (ook uit een vorige ronde of sessie) niet meteen herhalen
+  const laatste = laatsteSom(tafel);
+  const verboden = new Set([...vermijd, ...(laatste ? [laatste, [laatste[1], laatste[0]]] : [])].map(sleutel));
   const zoek = () => {
     for (let i = z.length - 1; i >= 0; i--) if (!verboden.has(sleutel(z[i]))) return i;
     return -1;
@@ -1144,11 +1139,18 @@ function trekSom(tafel, vermijd = []) {
     if (idx === -1) idx = z.length - 1;
   }
   const [p] = z.splice(idx, 1);
-  const herkansing = p[2] === 'h';
   bewaarZak(tafel);
-  const som = tafel ? { a: p[0], b: tafel } : { a: p[0], b: p[1] };
-  if (herkansing) som.herkansing = true;
-  return som;
+  try { localStorage.setItem('tafelspel-laatste-' + tafel, JSON.stringify(p)); } catch (e) {}
+  laatsteSommen[tafel] = p;
+  return tafel ? { a: p[0], b: tafel } : { a: p[0], b: p[1] };
+}
+
+const laatsteSommen = {};
+function laatsteSom(tafel) {
+  if (!(tafel in laatsteSommen)) {
+    try { laatsteSommen[tafel] = JSON.parse(localStorage.getItem('tafelspel-laatste-' + tafel)); } catch (e) { laatsteSommen[tafel] = null; }
+  }
+  return laatsteSommen[tafel];
 }
 
 // Balletjes met antwoorden uit de zak vliegen erin, daarna wordt geschud
@@ -1177,32 +1179,17 @@ function schudAnimatie(getallen) {
   zakTimer = setTimeout(() => ov.classList.remove('speel'), 2300);
 }
 
-// Regel onder de som: "Nog een keer!" bij een herkansing, anders (optioneel) wat er nog in de zak zit
-function toonSomLabel(id, herkansing, tafelVoorTeller) {
+// Regel onder de som: hoeveel sommen er nog in de zak zitten (leeg laten = geen teller)
+function toonSomLabel(id, tafelVoorTeller) {
   const el = $(id);
-  if (herkansing) {
-    el.className = 'som-label herkansing';
-    el.innerHTML = '<span>Nog een keer!</span>';
-  } else if (tafelVoorTeller !== undefined) {
-    const n = zak(tafelVoorTeller).length;
-    el.className = 'som-label';
-    el.innerHTML = icon('zak', 22) + (n === 0 ? 'Laatste uit de zak!' : `Nog ${n} in de zak`);
-  } else {
+  if (tafelVoorTeller === undefined) {
     el.className = 'som-label leeg';
     el.innerHTML = '';
+    return;
   }
-}
-
-// Een fout beantwoorde som komt binnen een paar beurten nog een keer terug
-function herhaalLater(tafel, som) {
-  const z = zak(tafel);
-  const p = [som.a, som.b];
-  const k = sleutel(p);
-  const bestaand = z.findIndex(q => sleutel(q) === k);
-  if (bestaand !== -1) z.splice(bestaand, 1);
-  const pos = Math.max(0, z.length - (3 + Math.floor(Math.random() * 4)));
-  z.splice(pos, 0, tafel ? [som.a, tafel, 'h'] : [p[0], p[1], 'h']);
-  bewaarZak(tafel);
+  const n = zak(tafelVoorTeller).length;
+  el.className = 'som-label';
+  el.innerHTML = icon('zak', 22) + (n === 0 ? 'Laatste uit de zak!' : `Nog ${n} in de zak`);
 }
 
 // Knoppen 1 t/m 10 in een grid; id's krijgen een prefix zodat ze te markeren zijn
@@ -1267,7 +1254,7 @@ function foutOpties(a, b) {
   return fout;
 }
 
-function maakAntwoordKnoppen(container, a, b, onGoed, onFout) {
+function maakAntwoordKnoppen(container, a, b, onGoed) {
   container.innerHTML = '';
   const juist = a * b;
   let klaar = false;
@@ -1286,7 +1273,6 @@ function maakAntwoordKnoppen(container, a, b, onGoed, onFout) {
         void btn.offsetWidth; // animatie opnieuw starten bij herhaald tikken
         btn.classList.add('fout');
         setTimeout(() => btn.classList.remove('fout'), 400);
-        if (onFout) onFout();
       }
     };
     container.appendChild(btn);
@@ -1294,13 +1280,8 @@ function maakAntwoordKnoppen(container, a, b, onGoed, onFout) {
 }
 
 // ========== OEFENEN ==========
-let oHerkansing = false, oVorigA = 0, oVorigB = 0, oTafel = 0, oModus = 'kies', oInput = '', oKlaar = false, oFoutGemeld = false;
+let oVorigA = 0, oVorigB = 0, oTafel = 0, oModus = 'kies', oInput = '', oKlaar = false;
 
-function oefenFout() {
-  if (oFoutGemeld) return; // één keer per som terugleggen is genoeg
-  oFoutGemeld = true;
-  herhaalLater(oTafel, { a: oVorigA, b: oVorigB });
-}
 
 // Wisselen tussen kiezen en typen houdt dezelfde som, zodat er niets uit de zak verloren gaat
 function zetOefenModus(m) {
@@ -1334,7 +1315,6 @@ function oefenNumpadTik(k) {
     } else {
       // fout: kort rood, dan leeg zodat ze opnieuw kan proberen
       toonInvoer('o-input', oInput, 'fout');
-      oefenFout();
       oKlaar = true;
       setTimeout(() => { oInput = ''; oKlaar = false; toonInvoer('o-input', ''); }, 700);
     }
@@ -1366,10 +1346,8 @@ function selecteerOefenTafel(n) {
 }
 
 function nieuweOefenSom() {
-  const { a, b, herkansing } = trekSom(oTafel, oVorigA ? [[oVorigA, oVorigB], [oVorigB, oVorigA]] : []);
-  oHerkansing = !!herkansing;
+  const { a, b } = trekSom(oTafel, oVorigA ? [[oVorigA, oVorigB], [oVorigB, oVorigA]] : []);
   oVorigA = a; oVorigB = b;
-  oFoutGemeld = false;
   toonOefenSom();
 }
 
@@ -1377,14 +1355,14 @@ function toonOefenSom() {
   const a = oVorigA, b = oVorigB;
   toon('o-goed', false);
   $('o-som').innerHTML = `${a} × ${b} = <span class="vraagteken">?</span>`;
-  toonSomLabel('o-label', oHerkansing, oTafel);
+  toonSomLabel('o-label', oTafel);
   maakBolletjes($('o-bolletjes'), a, b);
   oKlaar = false;
   oInput = '';
   toon('o-knoppen', oModus === 'kies');
   toon('o-typ', oModus === 'typ');
   toon('o-numpad', true);
-  if (oModus === 'kies') maakAntwoordKnoppen($('o-knoppen'), a, b, oefenGoed, oefenFout);
+  if (oModus === 'kies') maakAntwoordKnoppen($('o-knoppen'), a, b, oefenGoed);
   else toonInvoer('o-input', '');
 }
 
@@ -1546,7 +1524,6 @@ function renderOverhoringSom() {
   $('ov-voortgang').textContent = `Vraag ${ovIndex + 1} van ${OV_TOTAAL}`;
   renderScoreDots();
   $('ov-som').innerHTML = `${som.a} × ${som.b} = <span class="vraagteken">?</span>`;
-  toonSomLabel('ov-label', som.herkansing);
   toonInvoer('ov-input', '');
 }
 
@@ -1567,7 +1544,6 @@ function controleerOverhoringAntwoord() {
   som.ingevoerd = parseInt(ovInput, 10);
   som.correct = som.ingevoerd === som.a * som.b;
   if (som.correct) ovGoed++;
-  else herhaalLater(ovTafel, som);
   ovBeantwoord = true;
   toonInvoer('ov-input', ovInput, som.correct ? 'goed' : 'fout');
   renderScoreDots();
